@@ -1,0 +1,130 @@
+# SecureScan Dashboard Backend
+
+SecureScan Dashboard is a defensive cybersecurity API that performs lightweight website security checks for sites you own or have permission to test.
+
+## Safety disclaimer
+
+This project is for defensive security learning, auditing, and portfolio use only. Only scan websites you own or are authorized to test. The scanner intentionally avoids exploitation, brute forcing, payload injection, SQL injection exploitation, directory brute forcing, aggressive fuzzing, vulnerability scripts, and other offensive techniques.
+
+## Features
+
+- Security headers checker
+- SSL/TLS certificate checker
+- HTTP-to-HTTPS redirect checker
+- Server information leakage checker
+- Safe Nmap top-ports checker
+- Basic frontend library hints
+- Risk score and grade engine
+- SQLite scan history
+- Clean FastAPI endpoints
+- SSRF protection against private/local/internal targets
+
+## Tech stack
+
+- Python
+- FastAPI
+- Pydantic
+- Requests
+- SSL/socket libraries
+- SQLite
+- SQLAlchemy
+- Nmap through safe subprocess execution
+
+## Setup
+
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+On macOS/Linux, activate the virtual environment with:
+
+```bash
+source venv/bin/activate
+```
+
+The API will run at:
+
+```text
+http://127.0.0.1:8000
+```
+
+Interactive API docs:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+## Optional environment variables
+
+Copy `.env.example` to `.env` and edit values if needed.
+
+```bash
+SECURESCAN_DB_URL=sqlite:///./securescan.db
+SECURESCAN_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+SECURESCAN_REQUEST_TIMEOUT=8
+SECURESCAN_NMAP_TIMEOUT=60
+```
+
+## API endpoints
+
+### GET `/health`
+
+Returns backend status.
+
+### POST `/scan`
+
+Runs a full defensive scan.
+
+Request:
+
+```json
+{
+  "target_url": "https://example.com"
+}
+```
+
+### GET `/scans`
+
+Returns scan history.
+
+### GET `/scans/{scan_id}`
+
+Returns a full scan report by ID.
+
+### DELETE `/scans/{scan_id}`
+
+Deletes a scan from history.
+
+## Nmap note
+
+The project only uses this safe lightweight command:
+
+```bash
+nmap -T3 --top-ports 20 <hostname>
+```
+
+If Nmap is not installed, the API still works and returns a clear Nmap error inside the ports check.
+
+## Screenshots
+
+Add screenshots here after running the React dashboard:
+
+- Dashboard page
+- New scan page
+- Report page
+- Scan history page
+
+## Future improvements
+
+- Authentication
+- Supabase/PostgreSQL support
+- PDF report export
+- Scheduled scans
+- Email alerts
+- Domain ownership verification
+- More advanced dependency detection
+- Organization/team accounts

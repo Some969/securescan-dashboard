@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+backend/venv/
+backend/.env
+backend/securescan.db
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.db
+*.log
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment files
+.env
+.env.*
+
+# VS Code
+.vscode/
+
+# Node
+node_modules/
+dist/
+
+# Vite
+frontend/dist/
+
+# Build
+build/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Nmap outputs
+*.xml
+*.gnmap
+*.nmap
