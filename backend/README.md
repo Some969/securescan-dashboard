@@ -32,18 +32,24 @@ This project is for defensive security learning, auditing, and portfolio use onl
 
 ## Setup
 
+Use Python 3.13 for the backend dependencies. The pinned Pydantic version does not build with Python 3.14.
+
+Windows PowerShell:
+
 ```bash
-cd backend
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+py -3.13 -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
 ```
 
-On macOS/Linux, activate the virtual environment with:
+macOS/Linux:
 
 ```bash
+python3.13 -m venv venv
 source venv/bin/activate
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
 ```
 
 The API will run at:
