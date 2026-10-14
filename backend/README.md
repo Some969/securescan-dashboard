@@ -34,20 +34,20 @@ This project is for defensive security learning, auditing, and portfolio use onl
 
 Use Python 3.13 for the backend dependencies. The pinned Pydantic version does not build with Python 3.14.
 
-Windows PowerShell:
+Windows PowerShell (install Python 3.13 first):
 
-```bash
-py -3.13 -m venv venv
-.\venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python -m uvicorn app.main:app --reload
+```powershell
+py -3.13 --version
+py -3.13 -m venv venv313
+.\venv313\Scripts\python.exe -m pip install -r requirements.txt
+.\venv313\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
 macOS/Linux:
 
 ```bash
-python3.13 -m venv venv
-source venv/bin/activate
+python3.13 -m venv venv313
+source venv313/bin/activate
 python -m pip install -r requirements.txt
 python -m uvicorn app.main:app --reload
 ```

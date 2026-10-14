@@ -17,10 +17,11 @@ def check_cookies(target_url: str) -> Dict:
         }
 
     try:
+        payload = inspect_cookies_from_response(response)
         return {
             "ok": True,
-            **inspect_cookies_from_response(response),
-            "findings": build_cookie_findings(inspect_cookies_from_response(response)),
+            **payload,
+            "findings": build_cookie_findings(payload),
         }
     except Exception as exc:  # pragma: no cover - defensive fallback
         return {
@@ -35,13 +36,20 @@ def inspect_cookies_from_response(response) -> Dict:
     if not cookie_headers:
         return {
             "cookies_found": 0,
+            "results": [],
             "status": "No cookies detected.",
+            "summary": {
+                "missing_secure": 0,
+                "missing_httponly": 0,
+                "missing_samesite": 0,
+            },
         }
 
     results: List[dict] = []
     for header in cookie_headers:
         parsed = _parse_cookie_header(header)
-        results.append(parsed)
+        if parsed.get("name") or parsed.get("value"):
+            results.append(parsed)
 
     summary = {
         "missing_secure": sum(1 for item in results if not item.get("secure", False)),
@@ -53,6 +61,7 @@ def inspect_cookies_from_response(response) -> Dict:
         "cookies_found": len(results),
         "results": results,
         "summary": summary,
+        "status": f"{len(results)} cookie(s) detected.",
     }
 
 
@@ -123,8 +132,10 @@ def _extract_cookie_headers(response) -> List[str]:
             if values:
                 if isinstance(values, list):
                     extracted.extend(values)
+                elif isinstance(values, tuple):
+                    extracted.extend(list(values))
                 else:
-                    extracted.append(values)
+                    extracted.append(str(values))
         except Exception:  # pragma: no cover - defensive fallback
             pass
 
@@ -132,10 +143,23 @@ def _extract_cookie_headers(response) -> List[str]:
 
 
 def _parse_cookie_header(header: str) -> Dict:
+    if not header or not header.strip():
+        return {
+            "name": "",
+            "value": "",
+            "secure": False,
+            "httponly": False,
+            "samesite": None,
+            "expires": "",
+            "domain": "",
+            "path": "/",
+        }
+
     parts = [part.strip() for part in header.split(";") if part.strip()]
     if not parts:
         return {
             "name": "",
+            "value": "",
             "secure": False,
             "httponly": False,
             "samesite": None,
@@ -150,6 +174,7 @@ def _parse_cookie_header(header: str) -> Dict:
     if not name and not value:
         return {
             "name": "",
+            "value": "",
             "secure": False,
             "httponly": False,
             "samesite": None,
@@ -178,6 +203,7 @@ def _parse_cookie_header(header: str) -> Dict:
 
     return {
         "name": name,
+        "value": value,
         "secure": secure,
         "httponly": httponly,
         "samesite": samesite,

@@ -17,8 +17,10 @@ def _format_issuer(cert: dict) -> str:
 
 def check_ssl(target_url: str) -> Dict:
     findings: List[dict] = []
+    parsed = urlparse(target_url)
     hostname = hostname_from_url(target_url)
     scheme = scheme_from_url(target_url)
+    port = parsed.port or (443 if scheme == "https" else 80)
 
     result = {
         "ok": False,
@@ -27,6 +29,7 @@ def check_ssl(target_url: str) -> Dict:
         "issuer": None,
         "expires_at": None,
         "days_left": None,
+        "port": port,
         "error": None,
         "findings": findings,
     }
@@ -43,9 +46,12 @@ def check_ssl(target_url: str) -> Dict:
 
     try:
         context = ssl.create_default_context()
-        with socket.create_connection((hostname, 443), timeout=REQUEST_TIMEOUT) as sock:
+        with socket.create_connection((hostname, port), timeout=REQUEST_TIMEOUT) as sock:
             with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                 cert = secure_sock.getpeercert()
+
+        if not cert:
+            raise ssl.SSLError("No certificate returned by the server.")
 
         not_after = cert.get("notAfter")
         if not_after:
@@ -92,7 +98,7 @@ def check_ssl(target_url: str) -> Dict:
         result["error"] = f"Could not connect to HTTPS service: {exc}"
         findings.append({
             "title": "HTTPS service could not be reached",
-            "description": "The scanner could not connect to port 443 for TLS validation.",
+            "description": f"The scanner could not connect to port {port} for TLS validation.",
             "severity": "high",
             "affected_component": "SSL/TLS",
             "recommendation": "Confirm that HTTPS is enabled, reachable, and correctly configured.",

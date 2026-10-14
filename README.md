@@ -82,18 +82,26 @@ securescan-dashboard/
 
 ## Backend setup
 
-```bash
+Use Python 3.13 for the backend dependencies. The pinned Pydantic version does not build with Python 3.14.
+
+Windows PowerShell (install Python 3.13 first):
+
+```powershell
 cd backend
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+py -3.13 --version
+py -3.13 -m venv venv313
+.\venv313\Scripts\python.exe -m pip install -r requirements.txt
+.\venv313\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
-macOS/Linux activation:
+macOS/Linux:
 
 ```bash
-source venv/bin/activate
+cd backend
+python3.13 -m venv venv313
+source venv313/bin/activate
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
 ```
 
 Backend URL:
