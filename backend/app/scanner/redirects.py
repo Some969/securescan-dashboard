@@ -10,9 +10,10 @@ def check_https_redirect(target_url: str) -> Dict:
     findings: List[dict] = []
     parsed = urlparse(target_url)
     hostname = parsed.hostname or ""
-    netloc = hostname
-    if parsed.port and parsed.port not in {80, 443}:
-        netloc = f"{hostname}:{parsed.port}"
+    netloc = f"[{hostname}]" if ":" in hostname else hostname
+    http_port = parsed.port if parsed.scheme == "http" and parsed.port == 8080 else 80
+    if http_port != 80:
+        netloc = f"{netloc}:{http_port}"
 
     http_url = urlunparse(("http", netloc, parsed.path or "/", "", parsed.query, ""))
 

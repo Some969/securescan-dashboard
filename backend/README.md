@@ -6,6 +6,12 @@ SecureScan Dashboard is a defensive cybersecurity API that performs lightweight 
 
 This project is for defensive security learning, auditing, and portfolio use only. Only scan websites you own or are authorized to test. The scanner intentionally avoids exploitation, brute forcing, payload injection, SQL injection exploitation, directory brute forcing, aggressive fuzzing, vulnerability scripts, and other offensive techniques.
 
+## Network safety and production status
+
+HTTP targets are limited to ports 80 and 8080; HTTPS targets are limited to 443 and 8443. The scanner rejects non-public IP addresses and DNS responses containing any non-public address. HTTP redirects are followed manually and revalidated, HTTP requests do not inherit system proxy settings, and validated IP addresses are pinned for HTTP, TLS, and Nmap connections. HTTP response bodies are capped at 1 MB.
+
+The current API does not authenticate users, verify domain ownership, or enforce organization-level authorization. Therefore, these transport protections do not authorize scans: use the scanner only for targets you are explicitly permitted to assess, and do not expose this API publicly. Production use is blocked until authentication, tenant isolation, ownership and scan authorization, durable migrations, execution limits, and tenant-scoped reporting are implemented and tested. See [`docs/requirements-traceability.md`](../docs/requirements-traceability.md) for evidence and outstanding requirements.
+
 ## Features
 
 - Security headers checker

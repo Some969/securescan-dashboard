@@ -1,10 +1,13 @@
+import ipaddress
 import os
 import re
 import shutil
 import subprocess
 from typing import Dict, List
 
-from app.utils import hostname_from_url
+from fastapi import HTTPException
+
+from app.utils import hostname_from_url, resolve_public_addresses
 
 NMAP_TIMEOUT = int(os.getenv("SECURESCAN_NMAP_TIMEOUT", "60"))
 ALLOWED_WEB_PORTS = {80, 443}
@@ -31,6 +34,17 @@ def find_nmap_executable() -> str | None:
 def check_open_ports(target_url: str) -> Dict:
     hostname = hostname_from_url(target_url)
     findings: List[dict] = []
+    try:
+        destination_ip = resolve_public_addresses(hostname)[0]
+    except HTTPException:
+        return {
+            "ok": False,
+            "nmap_available": False,
+            "command": "nmap -T3 --top-ports 20 <validated-public-ip>",
+            "open_ports": [],
+            "error": "Target address failed public-network validation.",
+            "findings": findings,
+        }
 
     nmap_path = find_nmap_executable()
     if nmap_path is None:
@@ -43,7 +57,10 @@ def check_open_ports(target_url: str) -> Dict:
             "findings": findings,
         }
 
-    command = [nmap_path, "-T3", "--top-ports", "20", hostname]
+    command = [nmap_path, "-T3", "--top-ports", "20"]
+    if ipaddress.ip_address(destination_ip).version == 6:
+        command.append("-6")
+    command.append(destination_ip)
 
     try:
         completed = subprocess.run(

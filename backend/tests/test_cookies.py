@@ -44,7 +44,10 @@ class CookieScannerTests(unittest.TestCase):
 
     @patch("app.scanner.ssl_check.socket.create_connection")
     @patch("app.scanner.ssl_check.ssl.create_default_context")
-    def test_check_ssl_uses_the_url_port_when_present(self, mock_context_factory, mock_create_connection):
+    @patch("app.scanner.ssl_check.resolve_public_addresses", return_value=["93.184.216.34"])
+    def test_check_ssl_uses_the_url_port_and_pinned_ip(
+        self, mock_resolve, mock_context_factory, mock_create_connection
+    ):
         mock_context = MagicMock()
         mock_secure_sock = MagicMock()
         mock_secure_sock.getpeercert.return_value = {
@@ -61,7 +64,15 @@ class CookieScannerTests(unittest.TestCase):
         result = check_ssl("https://example.com:8443")
 
         self.assertTrue(result["ok"])
-        self.assertEqual(mock_create_connection.call_args[0][0][1], 8443)
+        self.assertEqual(
+            mock_create_connection.call_args.args[0],
+            ("93.184.216.34", 8443),
+        )
+        self.assertEqual(
+            mock_context.wrap_socket.call_args.kwargs["server_hostname"],
+            "example.com",
+        )
+        mock_resolve.assert_called_once_with("example.com")
 
 
 if __name__ == "__main__":

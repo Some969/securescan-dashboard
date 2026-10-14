@@ -4,7 +4,9 @@ from datetime import datetime, timezone
 from typing import Dict, List
 from urllib.parse import urlparse
 
-from app.utils import REQUEST_TIMEOUT, hostname_from_url, scheme_from_url
+from fastapi import HTTPException
+
+from app.utils import REQUEST_TIMEOUT, hostname_from_url, resolve_public_addresses, scheme_from_url
 
 
 def _format_issuer(cert: dict) -> str:
@@ -45,8 +47,14 @@ def check_ssl(target_url: str) -> Dict:
         return result
 
     try:
+        destination_ip = resolve_public_addresses(hostname)[0]
+    except HTTPException:
+        result["error"] = "TLS destination failed public-network validation."
+        return result
+
+    try:
         context = ssl.create_default_context()
-        with socket.create_connection((hostname, port), timeout=REQUEST_TIMEOUT) as sock:
+        with socket.create_connection((destination_ip, port), timeout=REQUEST_TIMEOUT) as sock:
             with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                 cert = secure_sock.getpeercert()
 
